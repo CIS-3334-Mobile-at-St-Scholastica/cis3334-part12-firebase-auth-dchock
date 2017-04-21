@@ -36,10 +36,16 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonCreateLogin;
     private Button buttonSignOut;
 
+    // declare the FirebaseAuth and AuthStateListener objects
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         textViewStatus = (TextView) findViewById(R.id.textViewStatus);
         editTextEmail = (EditText) findViewById(R.id.editTextEmail);
@@ -48,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
         buttonGoogleLogin = (Button) findViewById(R.id.buttonGoogleLogin);
         buttonCreateLogin = (Button) findViewById(R.id.buttonCreateLogin);
         buttonSignOut = (Button) findViewById(R.id.buttonSignOut);
+
+        //initialize theFirebaseAuth instance
+        mAuth = FirebaseAuth.getInstance();
+
 
         buttonLogin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -63,12 +73,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        buttonGoogleLogin.setOnClickListener(new View.OnClickListener() {
+     /*   buttonGoogleLogin.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Log.d("CIS3334", "Google login ");
                 googleSignIn();
             }
-        });
+        }); */
 
         buttonSignOut.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -77,24 +87,100 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //  AuthStateListener method
+        // so you can track whenever the user signs in or out.
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d("CIS3334", "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.d("CIS3334", "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+
 
     }
+
+    // sets the mAuthListener onStart used with Firebase
 
     private void createAccount(String email, String password) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d("CIS3334", "createUserWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(MainActivity.this,"Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        // ...
+                    }
+                });
+
 
     }
+
 
     private void signIn(String email, String password){
 
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d("CIS3334", "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w("CIS3334", "signInWithEmail:failed", task.getException());
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        // ...
+                    }
+                });
     }
 
     private void signOut () {
-
+        mAuth.signOut();
     }
 
-    private void googleSignIn() {
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    //Removes the mAuthListener if one exists onStop used with Firebase
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+
+   /* private void googleSignIn() {
 
     }
+    */
+
 
 
 

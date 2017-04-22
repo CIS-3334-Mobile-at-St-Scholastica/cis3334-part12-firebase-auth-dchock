@@ -41,6 +41,13 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth.AuthStateListener mAuthListener;
 
 
+    /**
+     * The onCreate method runs right when you start the app
+     * Sets the layout and assigns variables to their respective fields on the layout
+     * Sets onClickListeners to each button in the layout
+     * @param savedInstanceState
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +114,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    // sets the mAuthListener onStart used with Firebase
+    /**
+     * Passes the email and password from the text fields and creates the users account.
+     * returns an error if createAccount is unsuccessful
+     * @param email
+     * @param password
+     */
 
     private void createAccount(String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -132,6 +144,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Takes the email and password values entered by the user an checks to see if they're in the database
+     * @param email
+     * @param password
+     */
     private void signIn(String email, String password){
 
         mAuth.signInWithEmailAndPassword(email, password)
@@ -154,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    /*
+     * Signs user out of the database
+     */
     private void signOut () {
         mAuth.signOut();
     }
